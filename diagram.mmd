@@ -1,0 +1,26 @@
+classDiagram
+    class Person {
+        +Long id
+        +String firstName
+        +String lastName
+        +String email
+        +String phoneNumber
+        +String address
+        +PersonRole personRole
+    }
+
+    class PersonRole {
+        CUSTOMER
+        CONSULTANT
+    }
+
+    class PersonRepository
+    PersonRepository ..|> JpaRepository
+
+    class PersonService
+    class PersonController
+
+    PersonService --> PersonRepository : usa
+    PersonController --> PersonService : delega
+    PersonRepository --> Person : persiste
+    Person --> PersonRole : tiene
