@@ -2,6 +2,7 @@ package org.example.themovingcompany.model;
 
 import jakarta.persistence.*; //It imports everything inside the jakarta.persistence package that includes Entity, Id, GeneratedValue, GenerationType, Enumerated.
 import jakarta.validation.constraints.*;
+import org.example.themovingcompany.model.enums.PersonRole;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,10 @@ public class Person {
     // Required: CONSTRUCTOR with not args
 
     // Getters and setters (required for Spring to map JSON to this object)
+
+    public Person() {
+    }
+
     public Long getId() {
         return id;
     }

@@ -11,7 +11,6 @@ import org.example.themovingcompany.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -91,8 +90,6 @@ public class OrderController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-
-
 
     // DELETE /api/orders/{id} --> Deletes an order by ID.
     @DeleteMapping("/{id}")

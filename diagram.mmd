@@ -50,6 +50,7 @@ classDiagram
     class OrderService
     class OrderController
 
+%% Layer flow
     PersonService --> PersonRepository : uses
     PersonController --> PersonService : delegates
     PersonRepository --> Person : persists
@@ -58,7 +59,16 @@ classDiagram
     OrderService --> OrderRepository : uses
     OrderController --> OrderService : delegates
     OrderRepository --> Order : persists
-    Order --> ServiceType : uses
-    Order --> OrderStatus : uses
-    Order --> Person : belongs to
-    Person --> Order : has orders
+    Order --> ServiceType : has
+    Order --> OrderStatus : has
+
+%% Precise relations
+    Person "1" --> "*" Order : places
+    Order "*" --> "1" Person : belongs to
+
+%%Explicación de cambios
+%%Agregamos Person "1" --> "*" Order : places
+%% Y también Order "*" --> "1" Person : belongs to
+%%Para mostrar la relación bidireccional OneToMany / ManyToOne
+%%Mantenemos todas las capas (Controller → Service → Repository → Model)
+%%Usamos etiquetas ("1" y "*"), como indica la documentación oficial de Mermaid

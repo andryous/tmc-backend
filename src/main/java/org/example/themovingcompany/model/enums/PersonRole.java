@@ -1,4 +1,4 @@
-package org.example.themovingcompany.model;
+package org.example.themovingcompany.model.enums;
 
 public enum PersonRole {
     CUSTOMER,

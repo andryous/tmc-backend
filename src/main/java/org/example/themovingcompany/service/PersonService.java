@@ -1,7 +1,7 @@
 package org.example.themovingcompany.service;
 
 import org.example.themovingcompany.model.Person;
-import org.example.themovingcompany.model.PersonRole;
+import org.example.themovingcompany.model.enums.PersonRole;
 import org.example.themovingcompany.repository.PersonRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -64,39 +64,6 @@ public class PersonService {
                 });
 
     }
-
-// Partially updates a person by only changing the provided fields.
-// Returns Optional.of(person) if found and updated, or Optional.empty() if not found.
-        public Optional<Person> partialUpdatePerson(Long id, Person updates) {
-            // Check if the person exists in the database
-            return personRepository.findById(id)
-                    .map(existingPerson -> {
-                        // Update only the fields that are not null (they were sent by the client)
-
-                        if (updates.getFirstName() != null) {
-                            existingPerson.setFirstName(updates.getFirstName());
-                        }
-                        if (updates.getLastName() != null) {
-                            existingPerson.setLastName(updates.getLastName());
-                        }
-                        if (updates.getEmail() != null) {
-                            existingPerson.setEmail(updates.getEmail());
-                        }
-                        if (updates.getPhoneNumber() != null) {
-                            existingPerson.setPhoneNumber(updates.getPhoneNumber());
-                        }
-                        if (updates.getAddress() != null) {
-                            existingPerson.setAddress(updates.getAddress());
-                        }
-                        if (updates.getPersonRole() != null) {
-                            existingPerson.setPersonRole(updates.getPersonRole());
-                        }
-
-                        // Save the partially updated person to the database
-                        return personRepository.save(existingPerson);
-                    });
-        }
-
 
     // PATCH / Partially updates fields of an existing person.
     public Person patchPerson(Long id, Map<String, Object> updates) {
