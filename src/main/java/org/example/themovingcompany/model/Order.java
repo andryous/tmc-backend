@@ -5,11 +5,15 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
 @Entity // Marks this class as a JPA entity (database table)
+@Table(name = "ORDERS") // avoids conflict with reserved word ORDER
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; //Auto-generated unique ID.
+
+
+    //START VALIDATIONS.
 
     @NotBlank
     private String fromAddress; // Address the customer is moving from.
@@ -36,6 +40,8 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "person_id") // FK column to link with Person table.
     private Person person; // The person who placed the order.
+
+    //END VALIDATIONS.
 
     // Default CONSTRUCTOR (Required by JPA).
     public Order() {

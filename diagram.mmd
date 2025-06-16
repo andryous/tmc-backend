@@ -14,6 +14,31 @@ classDiagram
         CONSULTANT
     }
 
+    class Order {
+        +Long id
+        +String fromAddress
+        +String toAddress
+        +ServiceType serviceType
+        +LocalDate startDate
+        +LocalDate endDate
+        +String note
+        +OrderStatus status
+        +Person person
+    }
+
+    class ServiceType {
+        MOVING
+        PACKING
+        CLEANING
+    }
+
+    class OrderStatus {
+        PENDING
+        IN_PROGRESS
+        COMPLETED
+        CANCELLED
+    }
+
     class PersonRepository
     PersonRepository ..|> JpaRepository
 
@@ -24,3 +49,16 @@ classDiagram
     PersonController --> PersonService : delega
     PersonRepository --> Person : persiste
     Person --> PersonRole : tiene
+
+    class OrderRepository
+    OrderRepository ..|> JpaRepository
+
+    class OrderService
+    class OrderController
+
+    OrderService --> OrderRepository : usa
+    OrderController --> OrderService : delega
+    OrderRepository --> Order : persiste
+    Order --> ServiceType : usa
+    Order --> OrderStatus : usa
+    Order --> Person : pertenece a
