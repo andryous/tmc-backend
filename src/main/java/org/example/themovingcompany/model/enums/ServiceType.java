@@ -1,4 +1,4 @@
-package org.example.themovingcompany.model;
+package org.example.themovingcompany.model.enums;
 
 
     //Enum for the type of service requested in an order.

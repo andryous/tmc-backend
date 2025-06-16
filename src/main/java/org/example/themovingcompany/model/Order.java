@@ -1,7 +1,11 @@
 package org.example.themovingcompany.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import org.example.themovingcompany.model.enums.OrderStatus;
+import org.example.themovingcompany.model.enums.ServiceType;
+
 import java.time.LocalDate;
 
 @Entity // Marks this class as a JPA entity (database table)
@@ -37,8 +41,10 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status; // Current status: PENDING, IN_PROGRESS, etc.
 
+
     @ManyToOne
     @JoinColumn(name = "person_id") // FK column to link with Person table.
+    @JsonIgnore // Each order is linked to one person (customer or consultant).
     private Person person; // The person who placed the order.
 
     //END VALIDATIONS.

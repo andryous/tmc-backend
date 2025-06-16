@@ -3,6 +3,9 @@ package org.example.themovingcompany.model;
 import jakarta.persistence.*; //It imports everything inside the jakarta.persistence package that includes Entity, Id, GeneratedValue, GenerationType, Enumerated.
 import jakarta.validation.constraints.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 public class Person {
@@ -33,6 +36,11 @@ public class Person {
 
     @Enumerated(EnumType.STRING)
     private PersonRole personRole; // Store the enum as a readable String (e.g., "CUSTOMER", "CONSULTANT") instead of a number (0, 1).
+
+    //One person can have many orders.
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
+
 
     // Required: CONSTRUCTOR with not args
 
@@ -92,4 +100,16 @@ public class Person {
     public void setPersonRole(PersonRole personRole) {
         this.personRole = personRole;
     }
+
+    // Getter and setter for the list of orders (@OneToMany relationship)
+    // These methods manage the list of orders linked to this person.
+
+    public List<Order> getOrders() {
+    return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+    this.orders = orders;
+    }
+
 }

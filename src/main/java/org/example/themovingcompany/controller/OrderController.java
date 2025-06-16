@@ -2,11 +2,17 @@ package org.example.themovingcompany.controller;
 
 import jakarta.validation.Valid;
 import org.example.themovingcompany.model.Order;
+import org.example.themovingcompany.model.OrderRequestDTO;
+import org.example.themovingcompany.model.Person;
+import org.example.themovingcompany.model.enums.OrderStatus;
+import org.example.themovingcompany.model.enums.ServiceType;
+import org.example.themovingcompany.repository.PersonRepository;
 import org.example.themovingcompany.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,19 +21,21 @@ import java.util.Optional;
 public class OrderController {
 
     private final OrderService orderService;
+    private final PersonRepository personRepository;
 
-    //CONSTRUCTOR injection of the service layer.
-    public OrderController(OrderService orderService) {
+    // Constructor to inject dependencies
+    public OrderController(OrderService orderService, PersonRepository personRepository) {
         this.orderService = orderService;
+        this.personRepository = personRepository;
     }
 
     // GET /api/orders --> Returns all orders.
     @GetMapping
-    public List<Order> getAllOrders(){
+    public List<Order> getAllOrders() {
         return orderService.getAllOrders();
     }
 
-    // GET /api/orders --> Returns one order by ID.
+    // GET /api/orders/{id} --> Returns one order by ID.
     @GetMapping("/{id}")
     public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
         Optional<Order> order = orderService.getOrderById(id);
@@ -35,18 +43,33 @@ public class OrderController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // POST /api/orders --> Creates new order.
+    // POST /api/orders --> Creates a new order linked to a person.
     @PostMapping
-    public ResponseEntity<Order> createOrder(@Valid @RequestBody Order order) {
-        Order createdOrder = orderService.createOrder(order);
-        return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
+    public ResponseEntity<Order> createOrder(@Valid @RequestBody OrderRequestDTO request) {
+        // Find the person by ID
+        Person person = personRepository.findById(request.getPersonId())
+                .orElseThrow(() -> new IllegalArgumentException("Person not found with id: " + request.getPersonId()));
+
+        // Manually build the order from the DTO
+        Order order = new Order();
+        order.setFromAddress(request.getFromAddress());
+        order.setToAddress(request.getToAddress());
+        order.setServiceType(ServiceType.valueOf(request.getServiceType()));
+        order.setStartDate(LocalDate.parse(request.getStartDate()));
+        order.setEndDate(LocalDate.parse(request.getEndDate()));
+        order.setNote(request.getNote());
+        order.setStatus(OrderStatus.valueOf(request.getStatus()));
+        order.setPerson(person); // Link the order to the person
+
+        // Save and return the new order
+        Order savedOrder = orderService.createOrder(order);
+        return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
     }
 
-    // DELETE /api/orders --> Delete an order by ID.
+    // DELETE /api/orders/{id} --> Deletes an order by ID.
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteOrder(@PathVariable Long id) {
         orderService.deleteOrder(id);
     }
-
 }

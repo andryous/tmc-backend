@@ -7,9 +7,11 @@ classDiagram
         +String phoneNumber
         +String address
         +PersonRole personRole
+        +List~Order~ orders
     }
 
     class PersonRole {
+        <<enumeration>>
         CUSTOMER
         CONSULTANT
     }
@@ -27,12 +29,14 @@ classDiagram
     }
 
     class ServiceType {
+        <<enumeration>>
         MOVING
         PACKING
         CLEANING
     }
 
     class OrderStatus {
+        <<enumeration>>
         PENDING
         IN_PROGRESS
         COMPLETED
@@ -40,25 +44,21 @@ classDiagram
     }
 
     class PersonRepository
-    PersonRepository ..|> JpaRepository
-
     class PersonService
     class PersonController
-
-    PersonService --> PersonRepository : usa
-    PersonController --> PersonService : delega
-    PersonRepository --> Person : persiste
-    Person --> PersonRole : tiene
-
     class OrderRepository
-    OrderRepository ..|> JpaRepository
-
     class OrderService
     class OrderController
 
-    OrderService --> OrderRepository : usa
-    OrderController --> OrderService : delega
-    OrderRepository --> Order : persiste
-    Order --> ServiceType : usa
-    Order --> OrderStatus : usa
-    Order --> Person : pertenece a
+    PersonService --> PersonRepository : uses
+    PersonController --> PersonService : delegates
+    PersonRepository --> Person : persists
+    Person --> PersonRole : has
+
+    OrderService --> OrderRepository : uses
+    OrderController --> OrderService : delegates
+    OrderRepository --> Order : persists
+    Order --> ServiceType : uses
+    Order --> OrderStatus : uses
+    Order --> Person : belongs to
+    Person --> Order : has orders
