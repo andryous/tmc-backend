@@ -4,8 +4,10 @@ import org.example.themovingcompany.model.Person;
 import org.example.themovingcompany.model.PersonRole;
 import org.example.themovingcompany.repository.PersonRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service // Marks this class as a service component (used for business logic).
@@ -94,6 +96,56 @@ public class PersonService {
                         return personRepository.save(existingPerson);
                     });
         }
+
+
+    // PATCH / Partially updates fields of an existing person.
+    public Person patchPerson(Long id, Map<String, Object> updates) {
+        Person person = personRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Person not found with id: " + id));
+
+        for (Map.Entry<String, Object> entry : updates.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            switch (key) {
+                case "firstName":
+                    if (value instanceof String && StringUtils.hasText((String) value)) {
+                        person.setFirstName((String) value);
+                    }
+                    break;
+                case "lastName":
+                    if (value instanceof String && StringUtils.hasText((String) value)) {
+                        person.setLastName((String) value);
+                    }
+                    break;
+                case "email":
+                    if (value instanceof String && StringUtils.hasText((String) value)) {
+                        person.setEmail((String) value);
+                    }
+                    break;
+                case "phoneNumber":
+                    if (value instanceof String && StringUtils.hasText((String) value)) {
+                        person.setPhoneNumber((String) value);
+                    }
+                    break;
+                case "address":
+                    if (value instanceof String && StringUtils.hasText((String) value)) {
+                        person.setAddress((String) value);
+                    }
+                    break;
+                case "personRole":
+                    if (value instanceof String) {
+                        person.setPersonRole(PersonRole.valueOf(((String) value).toUpperCase()));
+                    }
+                    break;
+                default:
+                    // Ignore unknown fields or handle as needed
+                    break;
+            }
+        }
+
+        return personRepository.save(person);
+    }
 
 
 

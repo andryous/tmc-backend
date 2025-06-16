@@ -11,9 +11,11 @@ import org.example.themovingcompany.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -65,6 +67,32 @@ public class OrderController {
         Order savedOrder = orderService.createOrder(order);
         return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
     }
+
+    // PUT /api/orders/{id} --> Updates an existing order.
+    @PutMapping("/{id}")
+    public ResponseEntity<Order> updateOrder(
+            @PathVariable Long id,
+            @Valid @RequestBody Order updatedOrder) {
+
+        Order updated = orderService.updateOrder(id, updatedOrder);
+        return ResponseEntity.ok(updated);
+    }
+
+    // PATCH /api/orders/{id} --> Partially update an order.
+    @PatchMapping("/{id}")
+    public ResponseEntity<Order> patchOrder(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        try {
+            Order updatedOrder = orderService.patchOrder(id, updates);
+            return ResponseEntity.ok(updatedOrder);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+
 
     // DELETE /api/orders/{id} --> Deletes an order by ID.
     @DeleteMapping("/{id}")

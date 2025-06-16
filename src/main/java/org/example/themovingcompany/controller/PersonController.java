@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController                          //Exposes endpoints as REST.
 @RequestMapping("/api/persons")          //Base path for this resource.
@@ -56,15 +57,22 @@ public class PersonController {
                 .orElseGet(() -> ResponseEntity.notFound().build()); // If person not found, return 404 Not Found.
     }
 
-    // PATCH /api/persons/{id} --> Partially update an existing person
+    // PATCH /api/persons/{id} --> Partially update an existing person.
     @PatchMapping("/{id}")
-    public ResponseEntity<Person> partialUpdatePerson(@PathVariable Long id, @RequestBody Person updates) {
+    public ResponseEntity<Person> patchPerson(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
 
-        // Call the service to apply partial updates
-        return personService.partialUpdatePerson(id, updates)
-                .map(ResponseEntity::ok) // If update successful, return 200 OK with updated person
-                .orElseGet(() -> ResponseEntity.notFound().build()); // If not found, return 404 Not Found
+        try {
+            Person updatedPerson = personService.patchPerson(id, updates);
+            return ResponseEntity.ok(updatedPerson);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
+
+
+
 
 
 }
