@@ -41,9 +41,29 @@ public class PersonController {
 
     // DELETE /api/persons/{id}  --> Deletes a person.
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)   // 204 No Content
+    @ResponseStatus(HttpStatus.NO_CONTENT)   // 204 No Content.
     public void deletePerson(@PathVariable Long id) {
         personService.deletePerson(id);
+    }
+
+    // PUT /api/persons/{id} --> Replace an existing person completely.
+    @PutMapping("/{id}")
+    public ResponseEntity<Person> updatePerson(@PathVariable Long id, @Valid @RequestBody Person updatedPerson) {
+
+        // Call the service to update the person with new data.
+        return personService.updatePerson(id, updatedPerson)
+                .map(ResponseEntity::ok) // If update is successful, return 200 OK with the updated person.
+                .orElseGet(() -> ResponseEntity.notFound().build()); // If person not found, return 404 Not Found.
+    }
+
+    // PATCH /api/persons/{id} --> Partially update an existing person
+    @PatchMapping("/{id}")
+    public ResponseEntity<Person> partialUpdatePerson(@PathVariable Long id, @RequestBody Person updates) {
+
+        // Call the service to apply partial updates
+        return personService.partialUpdatePerson(id, updates)
+                .map(ResponseEntity::ok) // If update successful, return 200 OK with updated person
+                .orElseGet(() -> ResponseEntity.notFound().build()); // If not found, return 404 Not Found
     }
 
 

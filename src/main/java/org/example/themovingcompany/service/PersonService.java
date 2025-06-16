@@ -39,8 +39,63 @@ public class PersonService {
 
     //Delete a person by ID.
     public void deletePerson(Long id) {
+
         personRepository.deleteById(id);
     }
-// More methods like update, findByEmail, etc. can be added later
 
-}
+    // Updates an existing person with new data.
+// Returns Optional.of(person) if found and updated, or Optional.empty() if not found.
+    public Optional<Person> updatePerson(Long id, Person updatedPerson) {
+        // First, check if the person with the given ID exists
+        return personRepository.findById(id)
+                .map(existingPerson -> {
+                    // If found, update all fields with new values
+                    existingPerson.setFirstName(updatedPerson.getFirstName());
+                    existingPerson.setLastName(updatedPerson.getLastName());
+                    existingPerson.setEmail(updatedPerson.getEmail());
+                    existingPerson.setPhoneNumber(updatedPerson.getPhoneNumber());
+                    existingPerson.setAddress(updatedPerson.getAddress());
+                    existingPerson.setPersonRole(updatedPerson.getPersonRole());
+
+                    // Save the updated person in the database
+                    return personRepository.save(existingPerson);
+                });
+
+    }
+
+// Partially updates a person by only changing the provided fields.
+// Returns Optional.of(person) if found and updated, or Optional.empty() if not found.
+        public Optional<Person> partialUpdatePerson(Long id, Person updates) {
+            // Check if the person exists in the database
+            return personRepository.findById(id)
+                    .map(existingPerson -> {
+                        // Update only the fields that are not null (they were sent by the client)
+
+                        if (updates.getFirstName() != null) {
+                            existingPerson.setFirstName(updates.getFirstName());
+                        }
+                        if (updates.getLastName() != null) {
+                            existingPerson.setLastName(updates.getLastName());
+                        }
+                        if (updates.getEmail() != null) {
+                            existingPerson.setEmail(updates.getEmail());
+                        }
+                        if (updates.getPhoneNumber() != null) {
+                            existingPerson.setPhoneNumber(updates.getPhoneNumber());
+                        }
+                        if (updates.getAddress() != null) {
+                            existingPerson.setAddress(updates.getAddress());
+                        }
+                        if (updates.getPersonRole() != null) {
+                            existingPerson.setPersonRole(updates.getPersonRole());
+                        }
+
+                        // Save the partially updated person to the database
+                        return personRepository.save(existingPerson);
+                    });
+        }
+
+
+
+    }
+
