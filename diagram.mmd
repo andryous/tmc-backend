@@ -64,10 +64,10 @@ classDiagram
     Order --> OrderStatus : has
 
 %% Precise relations
-    Person "1" --> "*" Order : places (as customer)
-    Person "1" --> "*" Order : consults (as consultant)
-    Order "*" --> "1" Person : customer
-    Order "*" --> "1" Person : consultant
+    Person "1" --> "●" Order : places (as customer)
+    Person "1" --> "●" Order : consults (as consultant)
+    Order "●" --> "1" Person : customer
+    Order "●" --> "1" Person : consultant
 
 %% Explicación de cambios
 %% Añadimos los roles customer y consultant en Order con relaciones separadas
