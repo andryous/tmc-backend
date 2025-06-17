@@ -25,7 +25,8 @@ classDiagram
         +LocalDate endDate
         +String note
         +OrderStatus status
-        +Person person
+        +Person customer
+        +Person consultant
     }
 
     class ServiceType {
@@ -63,12 +64,12 @@ classDiagram
     Order --> OrderStatus : has
 
 %% Precise relations
-    Person "1" --> "*" Order : places
-    Order "*" --> "1" Person : belongs to
+    Person "1" --> "*" Order : places (as customer)
+    Person "1" --> "*" Order : consults (as consultant)
+    Order "*" --> "1" Person : customer
+    Order "*" --> "1" Person : consultant
 
-%%Explicación de cambios
-%%Agregamos Person "1" --> "*" Order : places
-%% Y también Order "*" --> "1" Person : belongs to
-%%Para mostrar la relación bidireccional OneToMany / ManyToOne
-%%Mantenemos todas las capas (Controller → Service → Repository → Model)
-%%Usamos etiquetas ("1" y "*"), como indica la documentación oficial de Mermaid
+%% Explicación de cambios
+%% Añadimos los roles customer y consultant en Order con relaciones separadas
+%% Actualizamos las relaciones bidireccionales para mostrar ambas asociaciones
+%% Conservamos la arquitectura por capas (Controller → Service → Repository → Model)

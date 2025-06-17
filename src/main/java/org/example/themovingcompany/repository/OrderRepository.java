@@ -10,7 +10,6 @@ import java.util.List;
 
 // Repository interface for managing Order entities
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    // I can add custom query methods here if needed later
 
     // Finds all orders where the consultant's ID matches
     List<Order> findByConsultantId(Long consultantId);

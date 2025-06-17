@@ -5,6 +5,7 @@ import org.example.themovingcompany.model.enums.OrderStatus;
 import org.example.themovingcompany.model.enums.ServiceType;
 import org.example.themovingcompany.repository.OrderRepository;
 import org.springframework.stereotype.Service;
+
 import java.util.Map;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -56,7 +57,6 @@ public class OrderService {
     public List<Order> searchOrdersByDateRange(LocalDate from, LocalDate to) {
         return orderRepository.findByStartDateBetween(from, to);
     }
-
 
 
     // Saves a new order or updates an existing one
@@ -193,8 +193,6 @@ public class OrderService {
             throw new IllegalArgumentException("Cannot change status once order is COMPLETED.");
         }
     }
-
-
 
 
 }
