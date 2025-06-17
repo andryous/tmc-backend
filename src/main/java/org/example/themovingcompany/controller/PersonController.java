@@ -1,5 +1,6 @@
 package org.example.themovingcompany.controller;
 
+
 import jakarta.validation.Valid;
 import org.example.themovingcompany.model.Person;
 import org.example.themovingcompany.service.PersonService;
@@ -70,9 +71,5 @@ public class PersonController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-
-
-
-
 
 }
