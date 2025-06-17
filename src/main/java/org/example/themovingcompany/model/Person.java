@@ -1,5 +1,6 @@
 package org.example.themovingcompany.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*; //It imports everything inside the jakarta.persistence package that includes Entity, Id, GeneratedValue, GenerationType, Enumerated.
 import jakarta.validation.constraints.*;
 import org.example.themovingcompany.model.enums.PersonRole;
@@ -39,11 +40,9 @@ public class Person {
     private PersonRole personRole; // Store the enum as a readable String (e.g., "CUSTOMER", "CONSULTANT") instead of a number (0, 1).
 
     //One person can have many orders.
-    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Prevent infinite loop when returning customer in JSON
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true) // Orders placed by this person as customer
     private List<Order> orders = new ArrayList<>();
-
-
-    // Required: CONSTRUCTOR with not args
 
     // Getters and setters (required for Spring to map JSON to this object)
 

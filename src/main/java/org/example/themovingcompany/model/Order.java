@@ -1,6 +1,5 @@
 package org.example.themovingcompany.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.example.themovingcompany.model.enums.OrderStatus;
@@ -42,10 +41,16 @@ public class Order {
     private OrderStatus status; // Current status: PENDING, IN_PROGRESS, etc.
 
 
+    // Customer associated with this order
     @ManyToOne
-    @JoinColumn(name = "person_id") // FK column to link with Person table.
-    @JsonIgnore // Each order is linked to one person (customer or consultant).
-    private Person person; // The person who placed the order.
+    @JoinColumn(name = "customer_id") // FK column linking to the customer (Person)
+    private Person customer;
+
+    // Consultant assigned to this order
+    @ManyToOne
+    @JoinColumn(name = "consultant_id") // FK column linking to the consultant (Person)
+    private Person consultant;
+
 
     //END VALIDATIONS.
 
@@ -117,11 +122,19 @@ public class Order {
         this.status = status;
     }
 
-    public Person getPerson() {
-        return person;
+    public Person getCustomer() {
+        return customer;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    public void setCustomer(Person customer) {
+        this.customer = customer;
+    }
+
+    public Person getConsultant() {
+        return consultant;
+    }
+
+    public void setConsultant(Person consultant) {
+        this.consultant = consultant;
     }
 }

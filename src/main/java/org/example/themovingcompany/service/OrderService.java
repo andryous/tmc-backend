@@ -32,6 +32,33 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
+    // Returns all orders linked to a given consultant ID
+    public List<Order> getOrdersByConsultant(Long consultantId) {
+        return orderRepository.findByConsultantId(consultantId);
+    }
+
+    // Returns all orders linked to a given customer ID
+    public List<Order> getOrdersByCustomer(Long customerId) {
+        return orderRepository.findByCustomerId(customerId);
+    }
+
+    // Returns all orders matching a given status
+    public List<Order> getOrdersByStatus(OrderStatus status) {
+        return orderRepository.findByStatus(status);
+    }
+
+    // Returns all orders with a given service type
+    public List<Order> getOrdersByServiceType(ServiceType serviceType) {
+        return orderRepository.findByServiceType(serviceType);
+    }
+
+    // Returns all orders with startDate between given range
+    public List<Order> searchOrdersByDateRange(LocalDate from, LocalDate to) {
+        return orderRepository.findByStartDateBetween(from, to);
+    }
+
+
+
     // Saves a new order or updates an existing one
     public Order createOrder(Order order) {
         // Check the endDate is not before startDate
