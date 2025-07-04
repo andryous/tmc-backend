@@ -117,6 +117,22 @@ public class OrderController {
         return orderService.searchOrdersByDateRange(from, to);
     }
 
+    // PUT /api/orders/{id} --> Fully updates an existing order based on incoming DTO
+    @PutMapping("/{id}")
+    public ResponseEntity<Order> updateOrder(
+            @PathVariable Long id,                             // Extract the order ID from the URL path
+            @Valid @RequestBody OrderRequestDTO request) {     // Deserialize and validate the request body into a DTO
+        try {
+            // Call the service to perform the update using the DTO data
+            Order updatedOrder = orderService.updateOrder(id, request);
+
+            // Return 200 OK with the updated order object
+            return ResponseEntity.ok(updatedOrder);
+        } catch (IllegalArgumentException e) {
+            // If invalid data or ID, return 400 Bad Request with no body
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
 
     // PATCH /api/orders/{id} --> Partially update an order.

@@ -1,6 +1,7 @@
 package org.example.themovingcompany.service;
 
 import org.example.themovingcompany.model.Order;
+import org.example.themovingcompany.model.OrderRequestDTO;
 import org.example.themovingcompany.model.enums.OrderStatus;
 import org.example.themovingcompany.model.enums.ServiceType;
 import org.example.themovingcompany.repository.OrderRepository;
@@ -69,6 +70,27 @@ public class OrderService {
 
         return orderRepository.save(order);
     }
+
+    // Updates an existing order using data from a DTO.
+// This version does not allow changing customer or consultant.
+    public Order updateOrder(Long id, OrderRequestDTO request) {
+        // Fetch the existing order from the database, or throw if not found
+        Order existingOrder = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
+
+        // Update editable fields using values from the request DTO
+        existingOrder.setFromAddress(request.getFromAddress()); // Update 'from' address
+        existingOrder.setToAddress(request.getToAddress());     // Update 'to' address
+        existingOrder.setServiceType(ServiceType.valueOf(request.getServiceType())); // Update service type
+        existingOrder.setStartDate(LocalDate.parse(request.getStartDate()));         // Update start date
+        existingOrder.setEndDate(LocalDate.parse(request.getEndDate()));             // Update end date
+        existingOrder.setNote(request.getNote());                                    // Update note
+        existingOrder.setStatus(OrderStatus.valueOf(request.getStatus()));           // Update order status
+
+        // Save and return the updated order
+        return orderRepository.save(existingOrder);
+    }
+
 
     // Deletes an order by ID
     public void deleteOrder(Long id) {
@@ -163,10 +185,22 @@ public class OrderService {
             }
         }
 
-        // Check that endDate is not before startDate after updates
+        if (order.getStartDate() == null || order.getEndDate() == null) {
+            throw new IllegalArgumentException("Start date and end date are required");
+        }
+
+        if (order.getStartDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Start date cannot be in the past");
+        }
+
+        if (order.getEndDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("End date cannot be in the past");
+        }
+
         if (order.getEndDate().isBefore(order.getStartDate())) {
             throw new IllegalArgumentException("End date cannot be before start date");
         }
+
 
         return orderRepository.save(order);
     }
