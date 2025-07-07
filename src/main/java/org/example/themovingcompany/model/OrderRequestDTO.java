@@ -11,6 +11,7 @@ public class OrderRequestDTO {
     private String status;
     private Long customerId; // ID of the customer placing the order
     private Long consultantId; // ID of the consultant assigned to the order
+    private Long modifiedByConsultantId; // ID of the consultant who last modified the order
 
 
     public String getFromAddress() {
@@ -83,5 +84,13 @@ public class OrderRequestDTO {
 
     public void setConsultantId(Long consultantId) {
         this.consultantId = consultantId;
+    }
+
+    public Long getModifiedByConsultantId() {
+        return modifiedByConsultantId;
+    }
+
+    public void setModifiedByConsultantId(Long modifiedByConsultantId) {
+        this.modifiedByConsultantId = modifiedByConsultantId;
     }
 }

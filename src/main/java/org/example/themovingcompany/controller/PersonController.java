@@ -27,6 +27,12 @@ public class PersonController {
         return personService.getAllPersons();
     }
 
+    // GET /api/persons/by-role/{role} --> Returns persons filtered by role (CUSTOMER or CONSULTANT)
+    @GetMapping("/by-role/{role}")
+    public List<Person> getPersonsByRole(@PathVariable String role) {
+        return personService.getPersonsByRole(role);
+    }
+
     //GET /api/persons/{id}  --> returns a single person or 404
     @GetMapping("/{id}")
     public ResponseEntity<Person> getPersonById(@PathVariable Long id) {

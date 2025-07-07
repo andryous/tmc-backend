@@ -25,6 +25,12 @@ public class PersonService {
         return personRepository.findAll();
     }
 
+    // Returns all persons that match the given role (CUSTOMER or CONSULTANT)
+    public List<Person> getPersonsByRole(String role) {
+        PersonRole parsedRole = PersonRole.valueOf(role.toUpperCase()); // Convert string to enum
+        return personRepository.findByPersonRole(parsedRole);
+    }
+
     //Returns a specific person by ID.
     public Optional<Person> getPersonById(Long id) {
         return personRepository.findById(id);

@@ -1,7 +1,10 @@
 package org.example.themovingcompany.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.example.themovingcompany.model.Order;
 import org.example.themovingcompany.model.OrderRequestDTO;
+import org.example.themovingcompany.model.Person;
 import org.example.themovingcompany.model.enums.OrderStatus;
 import org.example.themovingcompany.model.enums.ServiceType;
 import org.example.themovingcompany.repository.OrderRepository;
@@ -18,6 +21,8 @@ import java.util.Optional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     // Constructor injection: Spring injects the repository here
     public OrderService(OrderRepository orderRepository) {
@@ -75,8 +80,7 @@ public class OrderService {
 // This version does not allow changing customer or consultant.
     public Order updateOrder(Long id, OrderRequestDTO request) {
         // Fetch the existing order from the database, or throw if not found
-        Order existingOrder = orderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
+        Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
 
         // Update editable fields using values from the request DTO
         existingOrder.setFromAddress(request.getFromAddress()); // Update 'from' address
@@ -86,6 +90,15 @@ public class OrderService {
         existingOrder.setEndDate(LocalDate.parse(request.getEndDate()));             // Update end date
         existingOrder.setNote(request.getNote());                                    // Update note
         existingOrder.setStatus(OrderStatus.valueOf(request.getStatus()));           // Update order status
+
+        // Set lastUpdated timestamp
+        existingOrder.setLastUpdated(java.time.LocalDateTime.now());
+
+        // Set who modified it (consultant)
+        if (request.getModifiedByConsultantId() != null) {
+            Person modifier = entityManager.getReference(Person.class, request.getModifiedByConsultantId());
+            existingOrder.setModifiedBy(modifier);
+        }
 
         // Save and return the updated order
         return orderRepository.save(existingOrder);
@@ -104,8 +117,7 @@ public class OrderService {
     // Updates an existing order and validates status transition.
     public Order updateOrder(Long id, Order updatedOrder) {
         // Find existing order by ID or throw if not found
-        Order existingOrder = orderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
+        Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
 
         // Validate allowed status transitions
         validateStatusTransition(existingOrder, updatedOrder.getStatus());
@@ -125,8 +137,7 @@ public class OrderService {
 
     // Partially updates fields of an existing order.
     public Order patchOrder(Long id, Map<String, Object> updates) {
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
+        Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
 
         // Iterate over the fields to update
         for (Map.Entry<String, Object> entry : updates.entrySet()) {

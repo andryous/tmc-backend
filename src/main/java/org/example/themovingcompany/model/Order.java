@@ -6,6 +6,7 @@ import org.example.themovingcompany.model.enums.OrderStatus;
 import org.example.themovingcompany.model.enums.ServiceType;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity // Marks this class as a JPA entity (database table)
 @Table(name = "ORDERS") // avoids conflict with reserved word ORDER
@@ -40,6 +41,13 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status; // Current status: PENDING, IN_PROGRESS, etc.
 
+    private LocalDateTime lastUpdated; // Tracks when the order was last modified
+
+
+    // Consultant who last modified this order
+    @ManyToOne
+    @JoinColumn(name = "modified_by_consultant_id") // FK to track who modified the order
+    private Person modifiedBy; // Consultant who last modified this order
 
     // Customer associated with this order
     @ManyToOne
@@ -61,6 +69,7 @@ public class Order {
     public Long getId() {
         return id;
     }
+
 
     public void setId(Long id) {
         this.id = id;
@@ -122,6 +131,7 @@ public class Order {
         this.status = status;
     }
 
+
     public Person getCustomer() {
         return customer;
     }
@@ -134,7 +144,25 @@ public class Order {
         return consultant;
     }
 
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public Person getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(Person modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
     public void setConsultant(Person consultant) {
         this.consultant = consultant;
+
+
     }
 }
