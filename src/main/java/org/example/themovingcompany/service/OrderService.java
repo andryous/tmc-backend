@@ -145,6 +145,7 @@ public class OrderService {
             Object value = entry.getValue();
 
             switch (key) {
+
                 case "fromAddress":
                     if (value instanceof String && !((String) value).isBlank()) {
                         order.setFromAddress((String) value);
@@ -190,9 +191,19 @@ public class OrderService {
                         order.setStatus(newStatus);
                     }
                     break;
+
+                case "parentOrderId":
+                    if (value instanceof Number) {
+                        order.setParentOrderId(((Number) value).longValue());
+                    } else if (value == null) {
+                        order.setParentOrderId(null); // allow unsetting parent
+                    }
+                    break;
+
                 default:
                     // Ignore unknown fields or throw exception if preferred
                     break;
+
             }
         }
 

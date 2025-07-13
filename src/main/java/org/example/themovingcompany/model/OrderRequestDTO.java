@@ -12,6 +12,7 @@ public class OrderRequestDTO {
     private Long customerId; // ID of the customer placing the order
     private Long consultantId; // ID of the consultant assigned to the order
     private Long modifiedByConsultantId; // ID of the consultant who last modified the order
+    private Long parentOrderId; // Optional: links this order to a parent MOVING order
 
 
     public String getFromAddress() {
@@ -90,7 +91,15 @@ public class OrderRequestDTO {
         return modifiedByConsultantId;
     }
 
+    public void setParentOrderId(Long parentOrderId) {
+        this.parentOrderId = parentOrderId;
+    }
+
     public void setModifiedByConsultantId(Long modifiedByConsultantId) {
         this.modifiedByConsultantId = modifiedByConsultantId;
+    }
+
+    public Long getParentOrderId() {
+        return parentOrderId;
     }
 }

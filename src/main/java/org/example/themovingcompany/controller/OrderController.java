@@ -78,6 +78,7 @@ public class OrderController {
 
         // Manually build the order from the DTO
         Order order = new Order();
+        order.setParentOrderId(request.getParentOrderId());
         order.setFromAddress(request.getFromAddress());
         order.setToAddress(request.getToAddress());
         order.setServiceType(ServiceType.valueOf(request.getServiceType()));

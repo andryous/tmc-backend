@@ -41,7 +41,7 @@ public class Person {
 
     //One person can have many orders.
     @JsonIgnore // Prevent infinite loop when returning customer in JSON
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true) // Orders placed by this person as customer
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL) // Orders placed by this person as customer
     private List<Order> orders = new ArrayList<>();
 
     // Getters and setters (required for Spring to map JSON to this object)

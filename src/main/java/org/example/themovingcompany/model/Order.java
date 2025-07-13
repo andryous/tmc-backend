@@ -44,6 +44,10 @@ public class Order {
     private LocalDateTime lastUpdated; // Tracks when the order was last modified
 
 
+    // Optional parent-child relationship for linked services
+    @Column(name = "parent_order_id")
+    private Long parentOrderId;
+
     // Consultant who last modified this order
     @ManyToOne
     @JoinColumn(name = "modified_by_consultant_id") // FK to track who modified the order
@@ -158,6 +162,14 @@ public class Order {
 
     public void setModifiedBy(Person modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    public Long getParentOrderId() {
+        return parentOrderId;
+    }
+
+    public void setParentOrderId(Long parentOrderId) {
+        this.parentOrderId = parentOrderId;
     }
 
     public void setConsultant(Person consultant) {
