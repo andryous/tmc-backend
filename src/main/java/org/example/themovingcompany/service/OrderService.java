@@ -99,6 +99,11 @@ public class OrderService {
             Person modifier = entityManager.getReference(Person.class, request.getModifiedByConsultantId());
             existingOrder.setModifiedBy(modifier);
         }
+        // Set new consultant if consultantId is present
+        if (request.getConsultantId() != null) {
+            Person newConsultant = entityManager.getReference(Person.class, request.getConsultantId());
+            existingOrder.setConsultant(newConsultant);
+        }
 
         // Save and return the updated order
         return orderRepository.save(existingOrder);

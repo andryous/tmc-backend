@@ -120,20 +120,20 @@ public class OrderController {
 
     // PUT /api/orders/{id} --> Fully updates an existing order based on incoming DTO
     @PutMapping("/{id}")
-    public ResponseEntity<Order> updateOrder(
-            @PathVariable Long id,                             // Extract the order ID from the URL path
-            @Valid @RequestBody OrderRequestDTO request) {     // Deserialize and validate the request body into a DTO
+    public ResponseEntity<String> updateOrder(
+            @PathVariable Long id,
+            @Valid @RequestBody OrderRequestDTO request) {
         try {
-            // Call the service to perform the update using the DTO data
-            Order updatedOrder = orderService.updateOrder(id, request);
+            // Call the service to perform the update
+            orderService.updateOrder(id, request);
 
-            // Return 200 OK with the updated order object
-            return ResponseEntity.ok(updatedOrder);
+            // Return a success message (no entity serialization)
+            return ResponseEntity.ok("Order updated successfully");
         } catch (IllegalArgumentException e) {
-            // If invalid data or ID, return 400 Bad Request with no body
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("Invalid input");
         }
     }
+
 
 
     // PATCH /api/orders/{id} --> Partially update an order.
