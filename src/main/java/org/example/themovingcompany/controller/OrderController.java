@@ -65,20 +65,27 @@ public class OrderController {
         return orderService.getOrdersByStatus(status);
     }
 
-    // POST /api/orders --> Creates a new order linked to a person.
     @PostMapping
     public ResponseEntity<Order> createOrder(@Valid @RequestBody OrderRequestDTO request) {
-        // Find the customer by ID
+        // Find the customer by ID (always required)
         Person customer = personRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found with id: " + request.getCustomerId()));
 
-        // Find the consultant by ID
-        Person consultant = personRepository.findById(request.getConsultantId())
-                .orElseThrow(() -> new IllegalArgumentException("Consultant not found with id: " + request.getConsultantId()));
+        // Check if consultantId is present
+        Person consultant = null;
+
+        if (request.getConsultantId() != null) {
+            // Find the consultant by ID (if provided)
+            consultant = personRepository.findById(request.getConsultantId())
+                    .orElseThrow(() -> new IllegalArgumentException("Consultant not found with id: " + request.getConsultantId()));
+        } else if (request.getParentOrderId() == null) {
+            // If this is not a child order, consultantId is required
+            throw new IllegalArgumentException("Consultant ID is required for parent orders");
+        }
 
         // Manually build the order from the DTO
         Order order = new Order();
-        order.setParentOrderId(request.getParentOrderId());
+        order.setParentOrderId(request.getParentOrderId()); // May be null (no parent)
         order.setFromAddress(request.getFromAddress());
         order.setToAddress(request.getToAddress());
         order.setServiceType(ServiceType.valueOf(request.getServiceType()));
@@ -87,21 +94,26 @@ public class OrderController {
         order.setNote(request.getNote());
         order.setStatus(OrderStatus.valueOf(request.getStatus()));
         order.setCustomer(customer);
-        order.setConsultant(consultant);
+
+        if (consultant != null) {
+            order.setConsultant(consultant); // Only set if present
+        }
 
         // Validate that the person assigned as customer really has the CUSTOMER role
         if (!customer.getPersonRole().equals(PersonRole.CUSTOMER)) {
             throw new IllegalArgumentException("Person with ID " + customer.getId() + " is not a customer");
         }
 
-        // Validate that the person assigned as consultant really has the CONSULTANT role
-        if (!consultant.getPersonRole().equals(PersonRole.CONSULTANT)) {
+        // If consultant is present, validate their role
+        if (consultant != null && !consultant.getPersonRole().equals(PersonRole.CONSULTANT)) {
             throw new IllegalArgumentException("Person with ID " + consultant.getId() + " is not a consultant");
         }
+
         // Save and return the new order
         Order savedOrder = orderService.createOrder(order);
         return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
     }
+
 
     // GET /api/orders/by-service-type/{type} --> Returns all orders with a specific service type.
     @GetMapping("/by-service-type/{type}")

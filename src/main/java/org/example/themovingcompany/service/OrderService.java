@@ -89,7 +89,8 @@ public class OrderService {
         existingOrder.setStartDate(LocalDate.parse(request.getStartDate()));         // Update start date
         existingOrder.setEndDate(LocalDate.parse(request.getEndDate()));             // Update end date
         existingOrder.setNote(request.getNote());                                    // Update note
-        existingOrder.setStatus(OrderStatus.valueOf(request.getStatus()));           // Update order status
+        existingOrder.setStatus(OrderStatus.valueOf(request.getStatus())); // Update order status
+        existingOrder.setParentOrderId(request.getParentOrderId()); // Assign parent ID
 
         // Set lastUpdated timestamp
         existingOrder.setLastUpdated(java.time.LocalDateTime.now());
