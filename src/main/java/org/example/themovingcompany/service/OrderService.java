@@ -8,12 +8,12 @@ import org.example.themovingcompany.model.Person;
 import org.example.themovingcompany.model.enums.OrderStatus;
 import org.example.themovingcompany.model.enums.ServiceType;
 import org.example.themovingcompany.repository.OrderRepository;
+import org.example.themovingcompany.repository.PersonRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -21,12 +21,15 @@ import java.util.Optional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final PersonRepository personRepository; // Injects access to the person table
+
     @PersistenceContext
     private EntityManager entityManager;
 
-    // Constructor injection: Spring injects the repository here
-    public OrderService(OrderRepository orderRepository) {
+    // Constructor injection: Spring injects both repositories here
+    public OrderService(OrderRepository orderRepository, PersonRepository personRepository) {
         this.orderRepository = orderRepository;
+        this.personRepository = personRepository;
     }
 
     // Returns all orders from the database
@@ -64,71 +67,91 @@ public class OrderService {
         return orderRepository.findByStartDateBetween(from, to);
     }
 
+    // Saves a new order using a DTO that contains only IDs and Strings
+    public Order createOrder(OrderRequestDTO dto) {
+        Order order = new Order();
 
-    // Saves a new order or updates an existing one
-    public Order createOrder(Order order) {
-        // Check the endDate is not before startDate
-        if (order.getEndDate().isBefore(order.getStartDate())) {
-            throw new IllegalArgumentException("End date cannot be before start date");
+        // Convert enums and date strings to actual types
+        order.setServiceType(ServiceType.valueOf(dto.getServiceType()));
+        order.setStatus(OrderStatus.valueOf(dto.getStatus()));
+        order.setStartDate(LocalDate.parse(dto.getStartDate()));
+        order.setEndDate(LocalDate.parse(dto.getEndDate()));
 
+        // Set simple string fields
+        order.setFromAddress(dto.getFromAddress());
+        order.setToAddress(dto.getToAddress());
+        order.setNote(dto.getNote());
+        order.setParentOrderId(dto.getParentOrderId());
+
+        // 🔗 Set customer and consultant using their IDs
+        Person customer = personRepository.findById(dto.getCustomerId())
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        order.setCustomer(customer);
+
+        if (dto.getConsultantId() != null) {
+            Person consultant = personRepository.findById(dto.getConsultantId())
+                    .orElseThrow(() -> new RuntimeException("Consultant not found"));
+            order.setConsultant(consultant);
+        }
+
+        if (dto.getModifiedByConsultantId() != null) {
+            Person modifier = personRepository.findById(dto.getModifiedByConsultantId())
+                    .orElseThrow(() -> new RuntimeException("Modifier not found"));
+            order.setModifiedBy(modifier);
         }
 
         return orderRepository.save(order);
     }
 
-    // Updates an existing order using data from a DTO.
-// This version does not allow changing customer or consultant.
+    // Saves a new order from a full Order object (used in tests or admin logic)
+    public Order createOrder(Order order) {
+        if (order.getEndDate().isBefore(order.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
+        return orderRepository.save(order);
+    }
+
+    // Updates an existing order using data from a DTO (cannot change customer/consultant)
     public Order updateOrder(Long id, OrderRequestDTO request) {
-        // Fetch the existing order from the database, or throw if not found
-        Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
+        Order existingOrder = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
 
-        // Update editable fields using values from the request DTO
-        existingOrder.setFromAddress(request.getFromAddress()); // Update 'from' address
-        existingOrder.setToAddress(request.getToAddress());     // Update 'to' address
-        existingOrder.setServiceType(ServiceType.valueOf(request.getServiceType())); // Update service type
-        existingOrder.setStartDate(LocalDate.parse(request.getStartDate()));         // Update start date
-        existingOrder.setEndDate(LocalDate.parse(request.getEndDate()));             // Update end date
-        existingOrder.setNote(request.getNote());                                    // Update note
-        existingOrder.setStatus(OrderStatus.valueOf(request.getStatus())); // Update order status
-        existingOrder.setParentOrderId(request.getParentOrderId()); // Assign parent ID
+        existingOrder.setFromAddress(request.getFromAddress());
+        existingOrder.setToAddress(request.getToAddress());
+        existingOrder.setServiceType(ServiceType.valueOf(request.getServiceType()));
+        existingOrder.setStartDate(LocalDate.parse(request.getStartDate()));
+        existingOrder.setEndDate(LocalDate.parse(request.getEndDate()));
+        existingOrder.setNote(request.getNote());
+        existingOrder.setStatus(OrderStatus.valueOf(request.getStatus()));
+        existingOrder.setParentOrderId(request.getParentOrderId());
 
-        // Set lastUpdated timestamp
         existingOrder.setLastUpdated(java.time.LocalDateTime.now());
 
-        // Set who modified it (consultant)
         if (request.getModifiedByConsultantId() != null) {
             Person modifier = entityManager.getReference(Person.class, request.getModifiedByConsultantId());
             existingOrder.setModifiedBy(modifier);
         }
-        // Set new consultant if consultantId is present
+
         if (request.getConsultantId() != null) {
             Person newConsultant = entityManager.getReference(Person.class, request.getConsultantId());
             existingOrder.setConsultant(newConsultant);
         }
 
-        // Save and return the updated order
         return orderRepository.save(existingOrder);
     }
-
 
     // Deletes an order by ID
     public void deleteOrder(Long id) {
         orderRepository.deleteById(id);
     }
 
-    // Additional update methods (PUT/PATCH) can be added later
-
-
-    //MORE VALIDATION:
-    // Updates an existing order and validates status transition.
+    // Updates an order object and validates its status transition
     public Order updateOrder(Long id, Order updatedOrder) {
-        // Find existing order by ID or throw if not found
-        Order existingOrder = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
+        Order existingOrder = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
 
-        // Validate allowed status transitions
         validateStatusTransition(existingOrder, updatedOrder.getStatus());
 
-        // Update fields from the incoming object
         existingOrder.setStatus(updatedOrder.getStatus());
         existingOrder.setNote(updatedOrder.getNote());
         existingOrder.setFromAddress(updatedOrder.getFromAddress());
@@ -137,21 +160,19 @@ public class OrderService {
         existingOrder.setEndDate(updatedOrder.getEndDate());
         existingOrder.setServiceType(updatedOrder.getServiceType());
 
-        // Save updated order and return
         return orderRepository.save(existingOrder);
     }
 
-    // Partially updates fields of an existing order.
+    // Partially updates fields of an existing order
     public Order patchOrder(Long id, Map<String, Object> updates) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
 
-        // Iterate over the fields to update
         for (Map.Entry<String, Object> entry : updates.entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
 
             switch (key) {
-
                 case "fromAddress":
                     if (value instanceof String && !((String) value).isBlank()) {
                         order.setFromAddress((String) value);
@@ -197,19 +218,16 @@ public class OrderService {
                         order.setStatus(newStatus);
                     }
                     break;
-
                 case "parentOrderId":
                     if (value instanceof Number) {
                         order.setParentOrderId(((Number) value).longValue());
                     } else if (value == null) {
-                        order.setParentOrderId(null); // allow unsetting parent
+                        order.setParentOrderId(null);
                     }
                     break;
-
                 default:
-                    // Ignore unknown fields or throw exception if preferred
+                    // Ignore unknown fields
                     break;
-
             }
         }
 
@@ -229,32 +247,24 @@ public class OrderService {
             throw new IllegalArgumentException("End date cannot be before start date");
         }
 
-
         return orderRepository.save(order);
     }
 
-
-    // MORE VALIDATIONS:
-    // Validates allowed status transitions to maintain business logic integrity.
+    // Validates allowed status transitions to maintain business logic integrity
     private void validateStatusTransition(Order existingOrder, OrderStatus newStatus) {
         OrderStatus currentStatus = existingOrder.getStatus();
 
-        // Prevent direct transition from PENDING to COMPLETED
         if (currentStatus == OrderStatus.PENDING && newStatus == OrderStatus.COMPLETED) {
             throw new IllegalArgumentException("Cannot transition directly from PENDING to COMPLETED.");
         }
 
-        // Add more rules as needed, for example:
-        // Prevent transition from CANCELLED to any other status
         if (currentStatus == OrderStatus.CANCELLED && newStatus != OrderStatus.CANCELLED) {
             throw new IllegalArgumentException("Cannot change status once order is CANCELLED.");
         }
 
-        // Prevent transition from COMPLETED to any other status
         if (currentStatus == OrderStatus.COMPLETED && newStatus != OrderStatus.COMPLETED) {
             throw new IllegalArgumentException("Cannot change status once order is COMPLETED.");
         }
     }
-
 
 }
