@@ -4,123 +4,85 @@ import org.example.themovingcompany.model.Person;
 import org.example.themovingcompany.model.enums.PersonRole;
 import org.example.themovingcompany.repository.PersonRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-@Service // Marks this class as a service component (used for business logic).
+@Service
 public class PersonService {
 
     private final PersonRepository personRepository;
 
-    // Constructor injection: Spring injects the repository here automatically
+    // Constructor injection of the repository
     public PersonService(PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
 
-    // Return all persons from the database.
+    // Returns the full list of persons
     public List<Person> getAllPersons() {
         return personRepository.findAll();
     }
 
-    // Returns all persons that match the given role (CUSTOMER or CONSULTANT)
-    public List<Person> getPersonsByRole(String role) {
-        PersonRole parsedRole = PersonRole.valueOf(role.toUpperCase()); // Convert string to enum
-        return personRepository.findByPersonRole(parsedRole);
+    // Returns persons filtered by role
+    public List<Person> getPersonsByRole(String roleString) {
+        try {
+            PersonRole role = PersonRole.valueOf(roleString.toUpperCase());
+            return personRepository.findByPersonRole(role);
+        } catch (IllegalArgumentException e) {
+            return Collections.emptyList(); // return empty list if role is invalid
+        }
     }
 
-    //Returns a specific person by ID.
+    // Returns archived customers only (moved here from controller)
+    public List<Person> getArchivedCustomers() {
+        return personRepository.findByPersonRoleAndArchived(PersonRole.CUSTOMER, true);
+    }
+
+    // Returns a single person by ID
     public Optional<Person> getPersonById(Long id) {
         return personRepository.findById(id);
     }
 
-    // This method saves a new person or updates an existing one
-    public Person createPerson(Person person) { // Method name: createPerson. It receives a Person and returns a Person.
-
-        // Save the person to the database using the repository.
-        // personRepository is the tool (variable) that talks to the database.
-        // .save() is a built-in method from JpaRepository.
+    // Creates a new person
+    public Person createPerson(Person person) {
         return personRepository.save(person);
     }
 
-    //Delete a person by ID.
+    // Deletes a person by ID
     public void deletePerson(Long id) {
-
         personRepository.deleteById(id);
     }
 
-    // Updates an existing person with new data.
-// Returns Optional.of(person) if found and updated, or Optional.empty() if not found.
+    // Fully replaces a person with new data
     public Optional<Person> updatePerson(Long id, Person updatedPerson) {
-        // First, check if the person with the given ID exists
-        return personRepository.findById(id)
-                .map(existingPerson -> {
-                    // If found, update all fields with new values
-                    existingPerson.setFirstName(updatedPerson.getFirstName());
-                    existingPerson.setLastName(updatedPerson.getLastName());
-                    existingPerson.setEmail(updatedPerson.getEmail());
-                    existingPerson.setPhoneNumber(updatedPerson.getPhoneNumber());
-                    existingPerson.setAddress(updatedPerson.getAddress());
-                    existingPerson.setPersonRole(updatedPerson.getPersonRole());
-
-                    // Save the updated person in the database
-                    return personRepository.save(existingPerson);
-                });
-
+        return personRepository.findById(id).map(existing -> {
+            existing.setFirstName(updatedPerson.getFirstName());
+            existing.setLastName(updatedPerson.getLastName());
+            existing.setEmail(updatedPerson.getEmail());
+            existing.setPhoneNumber(updatedPerson.getPhoneNumber());
+            existing.setAddress(updatedPerson.getAddress());
+            existing.setPersonRole(updatedPerson.getPersonRole());
+            existing.setArchived(updatedPerson.isArchived());
+            return personRepository.save(existing);
+        });
     }
 
-    // PATCH / Partially updates fields of an existing person.
+    // Partially updates a person with specific fields
     public Person patchPerson(Long id, Map<String, Object> updates) {
-        Person person = personRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Person not found with id: " + id));
+        Person person = personRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("Person not found with id " + id));
 
-        for (Map.Entry<String, Object> entry : updates.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-
+        updates.forEach((key, value) -> {
             switch (key) {
-                case "firstName":
-                    if (value instanceof String && StringUtils.hasText((String) value)) {
-                        person.setFirstName((String) value);
-                    }
-                    break;
-                case "lastName":
-                    if (value instanceof String && StringUtils.hasText((String) value)) {
-                        person.setLastName((String) value);
-                    }
-                    break;
-                case "email":
-                    if (value instanceof String && StringUtils.hasText((String) value)) {
-                        person.setEmail((String) value);
-                    }
-                    break;
-                case "phoneNumber":
-                    if (value instanceof String && StringUtils.hasText((String) value)) {
-                        person.setPhoneNumber((String) value);
-                    }
-                    break;
-                case "address":
-                    if (value instanceof String && StringUtils.hasText((String) value)) {
-                        person.setAddress((String) value);
-                    }
-                    break;
-                case "personRole":
-                    if (value instanceof String) {
-                        person.setPersonRole(PersonRole.valueOf(((String) value).toUpperCase()));
-                    }
-                    break;
-                default:
-                    // Ignore unknown fields or handle as needed
-                    break;
+                case "firstName" -> person.setFirstName((String) value);
+                case "lastName" -> person.setLastName((String) value);
+                case "email" -> person.setEmail((String) value);
+                case "phoneNumber" -> person.setPhoneNumber((String) value);
+                case "address" -> person.setAddress((String) value);
+                case "archived" -> person.setArchived((Boolean) value);
+                case "personRole" -> person.setPersonRole(PersonRole.valueOf((String) value));
             }
-        }
+        });
 
         return personRepository.save(person);
     }
-
-
-
-    }
-
+}

@@ -1,6 +1,5 @@
 package org.example.themovingcompany.controller;
 
-
 import jakarta.validation.Valid;
 import org.example.themovingcompany.model.Person;
 import org.example.themovingcompany.service.PersonService;
@@ -11,9 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@RestController                          //Exposes endpoints as REST.
-@RequestMapping("/api/persons")          //Base path for this resource.
+@RestController                          // Exposes endpoints as REST.
+@RequestMapping("/api/persons")          // Base path for this resource.
 public class PersonController {
+
     private final PersonService personService;
 
     // Constructor injection of the service layer.
@@ -21,7 +21,7 @@ public class PersonController {
         this.personService = personService;
     }
 
-    //GET /api/persons --> returns the full list.
+    // GET /api/persons --> returns the full list.
     @GetMapping
     public List<Person> getAllPersons() {
         return personService.getAllPersons();
@@ -33,11 +33,18 @@ public class PersonController {
         return personService.getPersonsByRole(role);
     }
 
-    //GET /api/persons/{id}  --> returns a single person or 404
+    // GET /api/persons/by-role/CUSTOMER/archived --> Returns archived customers
+    // This now uses the service instead of accessing the repository directly
+    @GetMapping("/by-role/CUSTOMER/archived")
+    public List<Person> getArchivedCustomers() {
+        return personService.getArchivedCustomers();
+    }
+
+    // GET /api/persons/{id}  --> returns a single person or 404
     @GetMapping("/{id}")
     public ResponseEntity<Person> getPersonById(@PathVariable Long id) {
         return personService.getPersonById(id)
-                .map(ResponseEntity::ok)          //200 Ok if found.
+                .map(ResponseEntity::ok)          // 200 Ok if found.
                 .orElseGet(() -> ResponseEntity.notFound().build()); // 404 if not.
     }
 
@@ -57,7 +64,6 @@ public class PersonController {
     // PUT /api/persons/{id} --> Replace an existing person completely.
     @PutMapping("/{id}")
     public ResponseEntity<Person> updatePerson(@PathVariable Long id, @Valid @RequestBody Person updatedPerson) {
-
         // Call the service to update the person with new data.
         return personService.updatePerson(id, updatedPerson)
                 .map(ResponseEntity::ok) // If update is successful, return 200 OK with the updated person.
@@ -77,5 +83,4 @@ public class PersonController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-
 }

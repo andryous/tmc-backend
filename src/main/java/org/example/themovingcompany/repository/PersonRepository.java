@@ -10,4 +10,8 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     // Find all persons with a specific role (CUSTOMER or CONSULTANT)
     List<Person> findByPersonRole(PersonRole role);
+
+    List<Person> findByPersonRoleAndArchived(PersonRole personRole, boolean archived);
+
+
 }

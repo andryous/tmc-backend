@@ -38,6 +38,8 @@ public class Person {
 
     @Enumerated(EnumType.STRING)
     private PersonRole personRole; // Store the enum as a readable String (e.g., "CUSTOMER", "CONSULTANT") instead of a number (0, 1).
+    private boolean archived = false; // Indicates if the person is archived (soft delete)
+
 
     //One person can have many orders.
     @JsonIgnore // Prevent infinite loop when returning customer in JSON
@@ -116,4 +118,11 @@ public class Person {
     this.orders = orders;
     }
 
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
 }
