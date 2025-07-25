@@ -107,15 +107,30 @@ public class Person {
         this.personRole = personRole;
     }
 
+
+
+    private String password;
+
+    // Getter for password
+    public String getPassword() {
+        return password;
+    }
+
+    // Setter for password
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+
     // Getter and setter for the list of orders (@OneToMany relationship)
     // These methods manage the list of orders linked to this person.
 
     public List<Order> getOrders() {
-    return orders;
+        return orders;
     }
 
     public void setOrders(List<Order> orders) {
-    this.orders = orders;
+        this.orders = orders;
     }
 
     public boolean isArchived() {
