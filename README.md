@@ -61,7 +61,7 @@ This backend provides:
 ## 🛠 Build & Installation
 
 ### Prerequisites
-- **Java 21** (Azul Zulu JDK)
+- **Java JDK 21** 
 - **Apache Maven 3.9.10**
 - **PostgreSQL 16** (for production) or H2 (for local development)
 - **Git** (to clone the repository)
@@ -83,7 +83,7 @@ Run the following command to compile the project and download all dependencies:
    ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
    ```
 The application will be available at:
-http://localhost:8088/swagger-ui/index.html
+http://localhost:8088
 
 2. Production (PostgreSQL on Render)
    To run in the same environment as Render.com, make sure to set the following environment variables:
