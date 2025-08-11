@@ -10,14 +10,13 @@ The project was designed to be part of a complete system, including:
 - **Admin dashboard** – Where consultants manage orders and customers.
 - **Backend API** – The system you are currently viewing.
 
-
+---
 ## 🛠 Build & Installation
 
 ### Prerequisites
 - **Java JDK 21** 
 - **Apache Maven 3.9.10**
 - **PostgreSQL 16** (for production) or H2 (for local development)
-- **Git** (to clone the repository)
 
 ### Clone the repository
 ```bash
@@ -30,7 +29,7 @@ Run the following command to compile the project and download all dependencies:
 ./mvnw clean install
 ```
 ### Running the Application
-1. Development (Local, H2 Database)
+#### Development (Local, H2 Database)
    This mode uses an in-memory H2 database, ideal for quick local testing:
 ``` bash
    ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
@@ -38,13 +37,14 @@ Run the following command to compile the project and download all dependencies:
 The application will be available at:
 http://localhost:8088
 
-2. Production (PostgreSQL)
-
-``` bash
-SPRING_DATASOURCE_URL=<postgres_url>
-SPRING_DATASOURCE_USERNAME=<username>
-SPRING_DATASOURCE_PASSWORD=<password>
+#### Production (PostgreSQL)  
+   Set the following environment variables in your production environment.
+```bash
+SPRING_DATASOURCE_URL=postgresql://<db_username>:<db_password>@<host>:<port>/<db_name>
+SPRING_DATASOURCE_USERNAME=<db_username>
+SPRING_DATASOURCE_PASSWORD=<db_password>
 ```
+
 Then run:
 
 ``` bash
@@ -58,9 +58,10 @@ Then run:
 ## 🧪 Testing
 
 ### 1. Using Swagger UI
-- **Local:** swagger-ui/index.html)
+- **Local:** <your_base_url>/swagger-ui/index.html)
 - **Production (Render):** https://tmc-backend-8xi6.onrender.com/swagger-ui/index.html
 
+---
 
 ### 2. Using Postman
 1. Import the Swagger OpenAPI specification:  
