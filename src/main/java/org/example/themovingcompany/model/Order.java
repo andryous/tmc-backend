@@ -1,130 +1,88 @@
+// File: src/main/java/org/example/themovingcompany/model/Order.java
 package org.example.themovingcompany.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.example.themovingcompany.model.enums.OrderStatus;
-import org.example.themovingcompany.model.enums.ServiceType;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity // Marks this class as a JPA entity (database table)
-@Table(name = "ORDERS") // avoids conflict with reserved word ORDER
+@Entity
+@Table(name = "ORDERS")
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; //Auto-generated unique ID.
+    private Long id; // Auto-generated unique ID.
 
-
-    //START VALIDATIONS.
-
-    @NotBlank
-    private String fromAddress; // Address the customer is moving from.
-
-    @NotBlank
-    private String toAddress; // Address the customer is moving to.
-
+    // Overall status of the entire order.
     @NotNull
     @Enumerated(EnumType.STRING)
-    private ServiceType serviceType; // Type of service: MOVING,PACKING,etc.
+    private OrderStatus status;
 
-    @NotNull
-    private LocalDate startDate; // Start date of the service.
+    // Date the order was created.
+    private LocalDateTime creationDate;
 
-    @NotNull
-    private LocalDate endDate; // End date of the service.
+    // Last modification date.
+    private LocalDateTime lastUpdated;
 
-    private String note; // Optional note from the consultant.
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    private OrderStatus status; // Current status: PENDING, IN_PROGRESS, etc.
-
-    private LocalDateTime lastUpdated; // Tracks when the order was last modified
-
-
-    // Optional parent-child relationship for linked services
-    @Column(name = "parent_order_id")
-    private Long parentOrderId;
-
-    // Consultant who last modified this order
-    @ManyToOne
-    @JoinColumn(name = "modified_by_consultant_id") // FK to track who modified the order
-    private Person modifiedBy; // Consultant who last modified this order
-
-    // Customer associated with this order
-    @ManyToOne
-    @JoinColumn(name = "customer_id") // FK column linking to the customer (Person)
+    // Customer associated with this order.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
     private Person customer;
 
-    // Consultant assigned to this order
-    @ManyToOne
-    @JoinColumn(name = "consultant_id") // FK column linking to the consultant (Person)
+    // Main consultant assigned to this order.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "consultant_id")
     private Person consultant;
 
+    // Consultant who last modified this order.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "modified_by_consultant_id")
+    private Person modifiedBy;
 
-    //END VALIDATIONS.
+    // One-to-many relationship with order items.
+    // CascadeType.ALL: Operations (persist, merge, remove) on Order will cascade to OrderItems.
+    // orphanRemoval = true: If an OrderItem is removed from this list, it will be deleted from the database.
+    @OneToMany(
+            mappedBy = "order",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER // Fetch items eagerly with the order
+    )
+    private List<OrderItem> items = new ArrayList<>();
 
-    // Default CONSTRUCTOR (Required by JPA).
-    public Order() {
+    @PrePersist
+    protected void onCreate() {
+        creationDate = LocalDateTime.now();
     }
+
+    @PreUpdate
+    protected void onUpdate() {
+        lastUpdated = LocalDateTime.now();
+    }
+
+    // Helper method to manage the bidirectional relationship
+    public void addItem(OrderItem item) {
+        items.add(item);
+        item.setOrder(this);
+    }
+
+    public void removeItem(OrderItem item) {
+        items.remove(item);
+        item.setOrder(null);
+    }
+
+    // --- Getters and Setters ---
 
     public Long getId() {
         return id;
     }
 
-
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getFromAddress() {
-        return fromAddress;
-    }
-
-    public void setFromAddress(String fromAddress) {
-        this.fromAddress = fromAddress;
-    }
-
-    public String getToAddress() {
-        return toAddress;
-    }
-
-    public void setToAddress(String toAddress) {
-        this.toAddress = toAddress;
-    }
-
-    public ServiceType getServiceType() {
-        return serviceType;
-    }
-
-    public void setServiceType(ServiceType serviceType) {
-        this.serviceType = serviceType;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
     }
 
     public OrderStatus getStatus() {
@@ -135,6 +93,21 @@ public class Order {
         this.status = status;
     }
 
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
 
     public Person getCustomer() {
         return customer;
@@ -148,12 +121,8 @@ public class Order {
         return consultant;
     }
 
-    public LocalDateTime getLastUpdated() {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated(LocalDateTime lastUpdated) {
-        this.lastUpdated = lastUpdated;
+    public void setConsultant(Person consultant) {
+        this.consultant = consultant;
     }
 
     public Person getModifiedBy() {
@@ -164,17 +133,11 @@ public class Order {
         this.modifiedBy = modifiedBy;
     }
 
-    public Long getParentOrderId() {
-        return parentOrderId;
+    public List<OrderItem> getItems() {
+        return items;
     }
 
-    public void setParentOrderId(Long parentOrderId) {
-        this.parentOrderId = parentOrderId;
-    }
-
-    public void setConsultant(Person consultant) {
-        this.consultant = consultant;
-
-
+    public void setItems(List<OrderItem> items) {
+        this.items = items;
     }
 }

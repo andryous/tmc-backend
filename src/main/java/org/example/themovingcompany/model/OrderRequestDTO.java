@@ -1,76 +1,22 @@
+// File: src/main/java/org/example/themovingcompany/model/OrderRequestDTO.java
 package org.example.themovingcompany.model;
 
+import java.util.List;
+
+// This DTO represents the entire request to create a new order,
+// which now contains general information and a list of services.
 public class OrderRequestDTO {
 
-    private String fromAddress;
-    private String toAddress;
-    private String serviceType;
-    private String startDate;
-    private String endDate;
-    private String note;
-    private String status;
     private Long customerId; // ID of the customer placing the order
-    private Long consultantId; // ID of the consultant assigned to the order
-    private Long modifiedByConsultantId; // ID of the consultant who last modified the order
-    private Long parentOrderId; // Optional: links this order to a parent MOVING order
+    private Long consultantId; // ID of the main consultant assigned to the order
+    private Long modifiedByConsultantId; // ID of the consultant modifying the order
+    private String status; // Overall status of the order, e.g., "PENDING"
+
+    // A list of services to be included in this order.
+    private List<OrderItemRequestDTO> items;
 
 
-    public String getFromAddress() {
-        return fromAddress;
-    }
-
-    public void setFromAddress(String fromAddress) {
-        this.fromAddress = fromAddress;
-    }
-
-    public String getToAddress() {
-        return toAddress;
-    }
-
-    public void setToAddress(String toAddress) {
-        this.toAddress = toAddress;
-    }
-
-    public String getServiceType() {
-        return serviceType;
-    }
-
-    public void setServiceType(String serviceType) {
-        this.serviceType = serviceType;
-    }
-
-    public String getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
-
-    public String getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
+    // Getters and Setters
     public Long getCustomerId() {
         return customerId;
     }
@@ -91,15 +37,24 @@ public class OrderRequestDTO {
         return modifiedByConsultantId;
     }
 
-    public void setParentOrderId(Long parentOrderId) {
-        this.parentOrderId = parentOrderId;
-    }
 
     public void setModifiedByConsultantId(Long modifiedByConsultantId) {
         this.modifiedByConsultantId = modifiedByConsultantId;
     }
 
-    public Long getParentOrderId() {
-        return parentOrderId;
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public List<OrderItemRequestDTO> getItems() {
+        return items;
+    }
+
+    public void setItems(List<OrderItemRequestDTO> items) {
+        this.items = items;
     }
 }

@@ -16,7 +16,7 @@ The project was designed to be part of a complete system, including:
 ### Prerequisites
 - **Java JDK 21** 
 - **Apache Maven 3.9.10**
-- **PostgreSQL 16** (for production) or H2 (for local development)
+- **Postgres SQL 16** (for production) or H2 (for local development)
 
 ### Clone the repository
 ```bash
@@ -37,7 +37,7 @@ Run the following command to compile the project and download all dependencies:
 The application will be available at:
 http://localhost:8088
 
-#### Production (PostgreSQL)  
+#### Production (Postgres SQL)  
    Set the following environment variables in your production environment.
 ```bash
 SPRING_DATASOURCE_URL=postgresql://<db_username>:<db_password>@<host>:<port>/<db_name>
