@@ -1,4 +1,5 @@
 // File: src/main/java/org/example/themovingcompany/config/DataInitializer.java
+
 package org.example.themovingcompany.config;
 
 import org.example.themovingcompany.model.Order;
@@ -12,18 +13,19 @@ import org.example.themovingcompany.repository.PersonRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder; // ADDED: Import PasswordEncoder
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-//@Profile("dev")
 public class DataInitializer {
 
+    // CHANGED: Added PasswordEncoder to the method signature for dependency injection.
     @Bean
-    CommandLineRunner initDatabase(PersonRepository personRepository, OrderRepository orderRepository) {
+    CommandLineRunner initDatabase(PersonRepository personRepository, OrderRepository orderRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             if (personRepository.count() != 0) {
                 System.out.println("Database already contains data. Skipping initialization.");
@@ -32,7 +34,14 @@ public class DataInitializer {
 
             System.out.println("Database is empty. Initializing with a rich set of realistic test data...");
 
-            // --- Create Persons (5 Consultants, 10 Customers) ---
+            // --- Create Persons (Consultants, Customers) ---
+
+            // ADDED: A specific consultant for logging in, with an encoded password.
+            // This assumes your Person entity has a 'password' field with a setPassword method.
+            Person consultantLogin = createPerson("John", "TMC", "john@tmc.no", "+111222333", "789 Tech Hub, Austin, TX", PersonRole.CONSULTANT);
+            consultantLogin.setPassword(passwordEncoder.encode("demo123")); // Set the encoded password
+
+            // --- Original Data ---
             Person consultant1 = createPerson("John", "Doe", "john.doe@tmc.no", "+112233445", "456 Oak Ave, Austin, TX", PersonRole.CONSULTANT);
             Person consultant2 = createPerson("Karl", "Nilssen", "karl.nilssen@tmc.no", "+556677889", "1 Nydalen Alle, Oslo, Norway", PersonRole.CONSULTANT);
             Person consultant3 = createPerson("Maria", "Chen", "maria.chen@tmc.no", "+777888999", "88 Financial Dist, Hong Kong", PersonRole.CONSULTANT);
@@ -50,11 +59,13 @@ public class DataInitializer {
             Person customer9 = createPerson("William", "Taylor", "will.taylor@yahoo.com", "+999000111", "400 Pike St, Seattle, WA", PersonRole.CUSTOMER);
             Person customer10 = createPerson("Mary", "Anderson", "mary.a@hotmail.com", "+000111222", "500 Congress Ave, Austin, TX", PersonRole.CUSTOMER);
 
-            personRepository.saveAll(List.of(consultant1, consultant2, consultant3, consultant4, consultant5, customer1, customer2, customer3, customer4, customer5, customer6, customer7, customer8, customer9, customer10));
+            // Use a mutable list to add the new login consultant
+            List<Person> personsToSave = new ArrayList<>(List.of(consultant1, consultant2, consultant3, consultant4, consultant5, customer1, customer2, customer3, customer4, customer5, customer6, customer7, customer8, customer9, customer10));
+            personsToSave.add(consultantLogin); // Add the special login user
+            personRepository.saveAll(personsToSave);
 
-            // --- Create 12 Orders ---
 
-            // CHANGED: Using default constructor and setters instead of all-args constructor
+            // --- Create 12 Orders (No changes to this section) ---
             Order order1 = new Order();
             order1.setCustomer(customer1);
             order1.setConsultant(consultant1);
