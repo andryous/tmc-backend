@@ -34,7 +34,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * which are PostgreSQL-specific functions.
      * The `nativeQuery = true` flag is essential for this to work.
      *
-     * @param startDate The date from which to start counting orders.
+     * @param startDate The date from which to start counting orders..
      * @return A list of object arrays, where each array contains the month name and the order count.
      */
     @Query(value = "SELECT TO_CHAR(o.creation_date, 'Month'), COUNT(o.id) " +
