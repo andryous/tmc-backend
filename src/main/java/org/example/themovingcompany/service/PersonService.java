@@ -1,21 +1,68 @@
+// File: src/main/java/org/example/themovingcompany/service/PersonService.java
 package org.example.themovingcompany.service;
 
 import org.example.themovingcompany.model.Person;
 import org.example.themovingcompany.model.enums.PersonRole;
 import org.example.themovingcompany.repository.PersonRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class PersonService {
 
     private final PersonRepository personRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    // Constructor injection of the repository
-    public PersonService(PersonRepository personRepository) {
+    public PersonService(PersonRepository personRepository, PasswordEncoder passwordEncoder) {
         this.personRepository = personRepository;
+        this.passwordEncoder = passwordEncoder;
     }
+
+    /**
+     * ADDED: This method handles the login logic securely with debugging messages.
+     * @param email The user's email.
+     * @param rawPassword The plain-text password from the form.
+     * @return An Optional containing the Person if credentials are valid.
+     */
+    public Optional<Person> login(String email, String rawPassword) {
+        // --- Start of debugging code ---
+        System.out.println("\n--- INICIANDO INTENTO DE LOGIN ---");
+        System.out.println("Buscando usuario con email: " + email);
+
+        Optional<Person> optionalPerson = personRepository.findByEmail(email);
+
+        if (optionalPerson.isEmpty()) {
+            System.out.println(">>> RESULTADO: Usuario NO encontrado en la base de datos.");
+            System.out.println("------------------------------------\n");
+            return Optional.empty();
+        }
+
+        Person person = optionalPerson.get();
+        System.out.println(">>> RESULTADO: Usuario encontrado: " + person.getFirstName() + " " + person.getLastName());
+        System.out.println("Rol del usuario: " + person.getPersonRole());
+        System.out.println("Contraseña recibida del formulario: " + rawPassword);
+        System.out.println("Contraseña en la Base de Datos (encriptada): " + person.getPassword());
+
+        boolean passwordMatches = passwordEncoder.matches(rawPassword, person.getPassword());
+        System.out.println(">>> ¿Las contraseñas coinciden?: " + passwordMatches);
+
+        if (person.getPersonRole() == PersonRole.CONSULTANT && passwordMatches) {
+            System.out.println(">>> LOGIN EXITOSO!");
+            System.out.println("------------------------------------\n");
+            return Optional.of(person);
+        } else {
+            System.out.println(">>> LOGIN FALLIDO: El rol no es CONSULTANT o la contraseña no coincide.");
+            System.out.println("------------------------------------\n");
+            return Optional.empty();
+        }
+        // --- End of debugging code ---
+    }
+
 
     // Returns the full list of persons
     public List<Person> getAllPersons() {
