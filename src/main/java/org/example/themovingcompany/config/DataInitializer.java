@@ -19,7 +19,7 @@ import java.time.Month;
 import java.util.List;
 
 @Configuration
-@Profile("dev")
+//@Profile("dev")
 public class DataInitializer {
 
     @Bean
