@@ -50,8 +50,8 @@ public class OrderController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateOrder(@PathVariable Long id, @Valid @RequestBody OrderRequestDTO request) {
         try {
-            orderService.updateOrder(id, request);
-            return ResponseEntity.ok().build();
+            OrderResponseDTO updatedOrder = orderService.updateOrder(id, request);
+            return ResponseEntity.ok(updatedOrder);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

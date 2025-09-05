@@ -32,7 +32,7 @@ public class OrderService {
     }
 
     public List<OrderResponseDTO> getAllOrders() {
-        return orderRepository.findAll().stream()
+        return orderRepository.findAllByOrderByIdDesc().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -43,7 +43,6 @@ public class OrderService {
     }
 
     @Transactional
-    // FIX: Changed return type from Order to OrderResponseDTO
     public OrderResponseDTO createOrder(OrderRequestDTO requestDTO) {
         Person customer = personRepository.findById(requestDTO.getCustomerId())
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
@@ -73,12 +72,11 @@ public class OrderService {
         }
 
         Order savedOrder = orderRepository.save(order);
-        // FIX: Convert the saved entity to a DTO before returning
         return convertToDTO(savedOrder);
     }
 
     @Transactional
-    public Order updateOrder(Long id, OrderRequestDTO requestDTO) {
+    public OrderResponseDTO updateOrder(Long id, OrderRequestDTO requestDTO) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
 
@@ -109,7 +107,8 @@ public class OrderService {
             order.addItem(item);
         }
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        return convertToDTO(savedOrder);
     }
 
     public void deleteOrder(Long id) {

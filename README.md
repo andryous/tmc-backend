@@ -1,86 +1,69 @@
-# The Moving Company – Backend
+# The Moving Company - Backend API
 
-## Project Overview
+[![Java](https://img.shields.io/badge/Java-21-blue.svg?logo=openjdk&logoColor=white)](https://www.java.com)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2.6-brightgreen.svg?logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Maven](https://img.shields.io/badge/Maven-3.9-red.svg?logo=apache-maven&logoColor=white)](https://maven.apache.org)
 
-The Moving Company backend is a REST API that powers a moving, packing, and cleaning service management platform.  
-Its main purpose is to allow **sales consultants** to create, view, update, and manage service orders for customers.
+A secure RESTful API for a service management platform, built with Spring Boot and secured with JWT.
 
-The project was designed to be part of a complete system, including:
-- **Public website** – Where customers can learn about services and request quotes.
-- **Admin dashboard** – Where consultants manage orders and customers.
-- **Backend API** – The system you are currently viewing.
+**[Live Demo]** (https://tmc-dashboard-new.onrender.com/login)
 
 ---
-## 🛠 Build & Installation
 
-### Prerequisites
-- **Java JDK 21** 
-- **Apache Maven 3.9.10**
-- **Postgres SQL 16** (for production) or H2 (for local development)
+### ► Key Features
+- JWT Authentication & Role-Based Authorization (`ROLE_CONSULTANT`).
+- Full CRUD operations for Orders, Customers, and Consultants.
+- Archiving/Restoring functionality for customers.
+- Aggregated statistics endpoint for the dashboard.
 
-### Clone the repository
+### ► Tech Stack
+- **Backend:** Java 21, Spring Boot, Spring Security, Spring Data JPA
+- **Database:** PostgreSQL (Production), H2 (Development)
+- **Security:** JSON Web Tokens (JJWT)
+- **Build:** Apache Maven
+- **API Docs:** Swagger (OpenAPI 3)
+
+---
+
+### ► Getting Started
+
+**1. Prerequisites**
+- Java JDK 21
+- Maven 3.9+
+- PostgreSQL 17
+
+**2. Clone & Build**
 ```bash
 git clone https://github.com/andryous/tmc-backend.git
-cd tmc-backend
-```
-### Build the project
-Run the following command to compile the project and download all dependencies:
-```bash
 ./mvnw clean install
 ```
-### Running the Application
-#### Development (Local, H2 Database)
-   This mode uses an in-memory H2 database, ideal for quick local testing:
-``` bash
-   ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-   ```
-The application will be available at:
-http://localhost:8088
 
-#### Production (Postgres SQL)  
-   Set the following environment variables in your production environment.
-```bash
-SPRING_DATASOURCE_URL=postgresql://<db_username>:<db_password>@<host>:<port>/<db_name>
-SPRING_DATASOURCE_USERNAME=<db_username>
-SPRING_DATASOURCE_PASSWORD=<db_password>
+**3. Environment Configuration.**  
+Configure these variables in your environment or application-prod.properties.
+```properties
+# Production Database
+spring.datasource.url=jdbc:postgresql://<host>:<port>/<db_name>
+spring.datasource.username=<db_username>
+spring.datasource.password=<db_password>
+
+# JWT Secret Key (Base64 Encoded)
+application.security.jwt.secret-key=<your_base64_encoded_secret_key>
 ```
 
-Then run:
+**4. Run the Application**  
+Dev Profile (H2 in-memory DB):
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
 
-``` bash
+Prod Profile (PostgreSQL):
+```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
 ```
 
-💡 Note: The default port is 8088 in both environments. 
+### ► API Documentation
+For a detailed API reference and interactive testing, view the Swagger UI documentation available at http://localhost:8088/swagger-ui/index.html
 
----
-
-## 🧪 Testing
-
-### 1. Using Swagger UI
-- **Local:** <your_base_url>/swagger-ui/index.html)
-- **Production (Render):** https://tmc-backend-8xi6.onrender.com/swagger-ui/index.html
-
----
-
-### 2. Using Postman
-1. Import the Swagger OpenAPI specification:  
-   `<your_base_url>/v3/api-docs`
-2. Use the generated Postman collection to run requests.
-3. Set the environment variables (`base_url`, `auth` if needed).
-
----
-
-### 3. Using Seed Data
-In **development mode**, the application uses the `DataInitializer` class to seed sample data into the H2 database.  
-This allows immediate testing without manual data creation.
-
----
-## 👤 Credits
-**Author:** Claudio Rodriguez  
-**Context:** Crayon Consulting Academy Bootcamp – Fullstack Developer Program (Educational Project)
-
-
-
-
-
+### 👤 Author
+Claudio Rodriguez (Educational Project for Crayon Consulting Academy)

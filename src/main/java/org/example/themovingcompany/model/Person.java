@@ -1,143 +1,104 @@
 package org.example.themovingcompany.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*; //It imports everything inside the jakarta.persistence package that includes Entity, Id, GeneratedValue, GenerationType, Enumerated.
-import jakarta.validation.constraints.*;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.themovingcompany.model.enums.PersonRole;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-
+// --- LOMBOK ANNOTATIONS ADDED ---
+@Getter
+@Setter
+@NoArgsConstructor
+// ---------------------------------
 @Entity
-public class Person {
+@Table(name = "persons")
+public class Person implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank // The First name must not be empty or null.
-    @Size(max = 50) // Max lenght allowed is 50 characters.
+    @NotBlank
+    @Size(max = 50)
     private String firstName;
 
-    @NotBlank // The Last name must not be empty or null.
+    @NotBlank
     @Size(max = 50)
     private String lastName;
 
-    @NotBlank // Email must not be empty.
-    @Email // Email must follow a valid format like name@example.com
+    @NotBlank
+    @Email
+    @Column(unique = true)
     private String email;
 
-    @NotBlank // Phone number must not be empty (allows formats like +47...).
-    @Size(max = 50) // Limit the length to 50 characters.
+    @NotBlank
+    @Size(max = 50)
     private String phoneNumber;
 
-    @NotBlank // The address must not be empty.
-    @Size(max = 255) // Limit the length to 255 characters.
+    @NotBlank
+    @Size(max = 255)
     private String address;
 
     @Enumerated(EnumType.STRING)
-    private PersonRole personRole; // Store the enum as a readable String (e.g., "CUSTOMER", "CONSULTANT") instead of a number (0, 1).
-    private boolean archived = false; // Indicates if the person is archived (soft delete)
+    private PersonRole personRole;
 
+    private boolean archived = false;
 
-    //One person can have many orders.
-    @JsonIgnore // Prevent infinite loop when returning customer in JSON
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL) // Orders placed by this person as customer
+    @JsonIgnore
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
-
-    // Getters and setters (required for Spring to map JSON to this object)
-
-    public Person() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public PersonRole getPersonRole() {
-        return personRole;
-    }
-
-    public void setPersonRole(PersonRole personRole) {
-        this.personRole = personRole;
-    }
-
-
 
     private String password;
 
-    // Getter for password
+    // --- MANUALLY WRITTEN GETTERS, SETTERS, AND CONSTRUCTOR HAVE BEEN DELETED ---
+    // Lombok is now generating them automatically in the background.
+
+    // --- UserDetails implemented methods (THESE MUST REMAIN) ---
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // We add the "ROLE_" prefix that Spring Security expects by convention.
+        return List.of(new SimpleGrantedAuthority("ROLE_" + personRole.name()));
+    }
+
+    @Override
     public String getPassword() {
         return password;
     }
 
-    // Setter for password
-    public void setPassword(String password) {
-        this.password = password;
+    @Override
+    public String getUsername() {
+        return email;
     }
 
-
-    // Getter and setter for the list of orders (@OneToMany relationship)
-    // These methods manage the list of orders linked to this person.
-
-    public List<Order> getOrders() {
-        return orders;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public boolean isArchived() {
-        return archived;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public void setArchived(boolean archived) {
-        this.archived = archived;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

@@ -13,6 +13,15 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
+
+    /**
+     * Finds all orders and sorts them by ID in descending order.
+     * This will show the most recently created orders first.
+     * @return A list of orders sorted by ID descending.
+     */
+    List<Order> findAllByOrderByIdDesc();
+
+
     List<Order> findByConsultantId(Long consultantId);
     List<Order> findByCustomerId(Long customerId);
 
@@ -28,15 +37,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT p.firstName || ' ' || p.lastName, COUNT(o) FROM Order o JOIN o.customer p GROUP BY p.id ORDER BY COUNT(o) DESC LIMIT 5")
     List<Object[]> findTop5CustomersByOrderCount();
 
-    /**
-     * [CORRECTED] Counts orders grouped by month using a native PostgreSQL query.
-     * This query uses TO_CHAR to get the month name and EXTRACT to get the month number for sorting,
-     * which are PostgreSQL-specific functions.
-     * The `nativeQuery = true` flag is essential for this to work.
-     *
-     * @param startDate The date from which to start counting orders..
-     * @return A list of object arrays, where each array contains the month name and the order count.
-     */
     @Query(value = "SELECT TO_CHAR(o.creation_date, 'Month'), COUNT(o.id) " +
             "FROM orders o " +
             "WHERE o.creation_date >= :startDate " +
