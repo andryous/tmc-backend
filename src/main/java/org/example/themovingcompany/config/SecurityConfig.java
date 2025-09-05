@@ -1,4 +1,4 @@
-// File: tmc-backend/src/main/java/org/example/themovingcompany/config/SecurityConfig.java
+// File: src/main/java/org/example/themovingcompany/config/SecurityConfig.java
 package org.example.themovingcompany.config;
 
 import lombok.RequiredArgsConstructor;
@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer; // Import this
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -32,16 +33,20 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Whitelist endpoints for login and API documentation to be public.
-                        .requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Whitelist endpoints for login, API docs, AND H2 CONSOLE to be public.
+                        .requestMatchers(
+                                "/api/v1/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/h2-console/**" // --- NEW LINE ADDED HERE ---
+                        ).permitAll()
 
                         // Allow any authenticated user to perform GET requests.
                         .requestMatchers(HttpMethod.GET, "/api/**").authenticated()
 
-                        // --- FIX IS HERE ---
-                        // The typo "CONS-ULTANT" has been corrected to "CONSULTANT".
+                        // Require CONSULTANT role for write operations.
                         .requestMatchers(HttpMethod.POST, "/api/**").hasRole("CONSULTANT")
-                        .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("CONSULTANT") // Corrected line
+                        .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("CONSULTANT")
                         .requestMatchers(HttpMethod.PATCH, "/api/**").hasRole("CONSULTANT")
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("CONSULTANT")
 
@@ -52,10 +57,15 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                // --- NEW LINES ADDED HERE for H2 Console iFrame ---
+                .headers(headers ->
+                        headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                );
 
         return http.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
