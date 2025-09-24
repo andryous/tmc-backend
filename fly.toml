@@ -1,3 +1,11 @@
-# fly.toml file created for tmc-backend
+# fly.toml file for tmc-backend
 
 app = "tmc-backend"
+primary_region = "ams"
+
+[http_service]
+internal_port = 8080
+force_https = true
+auto_stop_machines = true
+auto_start_machines = true
+min_machines_running = 0
