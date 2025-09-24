@@ -27,6 +27,5 @@ jobs:
       # It uses a secret called FLY_API_TOKEN for authentication.
       - name: Deploy to Fly.io
         env:
-          FLY_API_TOKEN: FlyV1 fm2_lJPECAAAAAAAChO7xBBMKnyAFS9a5tBzCMuFI0ruwrVodHRwczovL2FwaS5mbHkuaW8vdjGUAJLOABNAXh8Lk7lodHRwczovL2FwaS5mbHkuaW8vYWFhL3YxxDxNIfSRSffJ2AhJbX3Ys5l5bSJ9F4bD8DwB68ric+qbOkXtpcdV5lw+P5dBpeZF6jcsz+oZkfb3MWIbDELETgqhu5zSHZtj8q2lkXqWEpSQhMD+es9qRaWN5IvdDUwkteY11NAXu5JuwgYKfcJjY/dNCMPQEkZWaMvn5khIPPbHuYYdIN9wpY0NKKWzoMQgzlikzRdLI1Ly0Pi5jyG8207BIQsdC49Px3nXVi8SVOo=
-
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: flyctl deploy --remote-only
