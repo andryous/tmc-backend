@@ -26,7 +26,7 @@ WORKDIR /app
 COPY --from=build /app/target/the-moving-company-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose port
-EXPOSE 8088
+EXPOSE 8080
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
